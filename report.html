@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title id="head-title">report.html</title>
+      <style type="text/css">body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  /* do not increase min-width as some may use split screens */
+  min-width: 800px;
+  color: #999;
+}
+
+h1 {
+  font-size: 24px;
+  color: black;
+}
+
+h2 {
+  font-size: 16px;
+  color: black;
+}
+
+p {
+  color: black;
+}
+
+a {
+  color: #999;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+/******************************
+ * SUMMARY INFORMATION
+ ******************************/
+#environment td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  vertical-align: top;
+}
+#environment tr:nth-child(odd) {
+  background-color: #f6f6f6;
+}
+#environment ul {
+  margin: 0;
+  padding: 0 20px;
+}
+
+/******************************
+ * TEST RESULT COLORS
+ ******************************/
+span.passed,
+.passed .col-result {
+  color: green;
+}
+
+span.skipped,
+span.xfailed,
+span.rerun,
+.skipped .col-result,
+.xfailed .col-result,
+.rerun .col-result {
+  color: orange;
+}
+
+span.error,
+span.failed,
+span.xpassed,
+.error .col-result,
+.failed .col-result,
+.xpassed .col-result {
+  color: red;
+}
+
+.col-links__extra {
+  margin-right: 3px;
+}
+
+/******************************
+ * RESULTS TABLE
+ *
+ * 1. Table Layout
+ * 2. Extra
+ * 3. Sorting items
+ *
+ ******************************/
+/*------------------
+ * 1. Table Layout
+ *------------------*/
+#results-table {
+  border: 1px solid #e6e6e6;
+  color: #999;
+  font-size: 12px;
+  width: 100%;
+}
+#results-table th,
+#results-table td {
+  padding: 5px;
+  border: 1px solid #e6e6e6;
+  text-align: left;
+}
+#results-table th {
+  font-weight: bold;
+}
+
+/*------------------
+ * 2. Extra
+ *------------------*/
+.logwrapper {
+  max-height: 230px;
+  overflow-y: scroll;
+  background-color: #e6e6e6;
+}
+.logwrapper.expanded {
+  max-height: none;
+}
+.logwrapper.expanded .logexpander:after {
+  content: "collapse [-]";
+}
+.logwrapper .logexpander {
+  z-index: 1;
+  position: sticky;
+  top: 10px;
+  width: max-content;
+  border: 1px solid;
+  border-radius: 3px;
+  padding: 5px 7px;
+  margin: 10px 0 10px calc(100% - 80px);
+  cursor: pointer;
+  background-color: #e6e6e6;
+}
+.logwrapper .logexpander:after {
+  content: "expand [+]";
+}
+.logwrapper .logexpander:hover {
+  color: #000;
+  border-color: #000;
+}
+.logwrapper .log {
+  min-height: 40px;
+  position: relative;
+  top: -50px;
+  height: calc(100% + 50px);
+  border: 1px solid #e6e6e6;
+  color: black;
+  display: block;
+  font-family: "Courier New", Courier, monospace;
+  padding: 5px;
+  padding-right: 80px;
+  white-space: pre-wrap;
+}
+
+div.media {
+  border: 1px solid #e6e6e6;
+  float: right;
+  height: 240px;
+  margin: 0 5px;
+  overflow: hidden;
+  width: 320px;
+}
+
+.media-container {
+  display: grid;
+  grid-template-columns: 25px auto 25px;
+  align-items: center;
+  flex: 1 1;
+  overflow: hidden;
+  height: 200px;
+}
+
+.media-container--fullscreen {
+  grid-template-columns: 0px auto 0px;
+}
+
+.media-container__nav--right,
+.media-container__nav--left {
+  text-align: center;
+  cursor: pointer;
+}
+
+.media-container__viewport {
+  cursor: pointer;
+  text-align: center;
+  height: inherit;
+}
+.media-container__viewport img,
+.media-container__viewport video {
+  object-fit: cover;
+  width: 100%;
+  max-height: 100%;
+}
+
+.media__name,
+.media__counter {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  flex: 0 0 25px;
+  align-items: center;
+}
+
+.collapsible td:not(.col-links) {
+  cursor: pointer;
+}
+.collapsible td:not(.col-links):hover::after {
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+}
+
+.col-result {
+  width: 130px;
+}
+.col-result:hover::after {
+  content: " (hide details)";
+}
+
+.col-result.collapsed:hover::after {
+  content: " (show details)";
+}
+
+#environment-header h2:hover::after {
+  content: " (hide details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+#environment-header.collapsed h2:hover::after {
+  content: " (show details)";
+  color: #bbb;
+  font-style: italic;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/*------------------
+ * 3. Sorting items
+ *------------------*/
+.sortable {
+  cursor: pointer;
+}
+.sortable.desc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: -12.5px;
+  border: 10px solid #4caf50;
+  border-bottom: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+.sortable.asc:after {
+  content: " ";
+  position: relative;
+  left: 5px;
+  bottom: 12.5px;
+  border: 10px solid #4caf50;
+  border-top: 0;
+  border-left-color: transparent;
+  border-right-color: transparent;
+}
+
+.hidden, .summary__reload__button.hidden {
+  display: none;
+}
+
+.summary__data {
+  flex: 0 0 550px;
+}
+.summary__reload {
+  flex: 1 1;
+  display: flex;
+  justify-content: center;
+}
+.summary__reload__button {
+  flex: 0 0 300px;
+  display: flex;
+  color: white;
+  font-weight: bold;
+  background-color: #4caf50;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.summary__reload__button:hover {
+  background-color: #46a049;
+}
+.summary__spacer {
+  flex: 0 0 550px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.filters,
+.collapse {
+  display: flex;
+  align-items: center;
+}
+.filters button,
+.collapse button {
+  color: #999;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.filters button:hover,
+.collapse button:hover {
+  color: #ccc;
+}
+
+.filter__label {
+  margin-right: 10px;
+}
+
+      </style>
+    
+  </head>
+  <body>
+    <h1 id="title">report.html</h1>
+    <p>Report generated on 30-Sep-2026 at 00:26:21 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a>
+        v4.2.0</p>
+    <div id="environment-header">
+      <h2>Environment</h2>
+    </div>
+    <table id="environment"></table>
+    <!-- TEMPLATES -->
+      <template id="template_environment_row">
+      <tr>
+        <td></td>
+        <td></td>
+      </tr>
+    </template>
+    <template id="template_results-table__body--empty">
+      <tbody class="results-table-row">
+        <tr id="not-found-message">
+          <td colspan="4">No results found. Check the filters.</td>
+        </tr>
+      </tbody>
+    </template>
+    <template id="template_results-table__tbody">
+      <tbody class="results-table-row">
+        <tr class="collapsible">
+        </tr>
+        <tr class="extras-row">
+          <td class="extra" colspan="4">
+            <div class="extraHTML"></div>
+            <div class="media">
+              <div class="media-container">
+                  <div class="media-container__nav--left">&lt;</div>
+                  <div class="media-container__viewport">
+                    <img src="" />
+                    <video controls>
+                      <source src="" type="video/mp4">
+                    </video>
+                  </div>
+                  <div class="media-container__nav--right">&gt;</div>
+                </div>
+                <div class="media__name"></div>
+                <div class="media__counter"></div>
+            </div>
+            <div class="logwrapper">
+              <div class="logexpander"></div>
+              <div class="log"></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </template>
+    <!-- END TEMPLATES -->
+    <div class="summary">
+      <div class="summary__data">
+        <h2>Summary</h2>
+        <div class="additional-summary prefix">
+        </div>
+        <p class="run-count">12 tests took 00:00:23.</p>
+        <p class="filter">(Un)check the boxes to filter the results.</p>
+        <div class="summary__reload">
+          <div class="summary__reload__button hidden" onclick="location.reload()">
+            <div>There are still tests running. <br />Reload this page to get the latest results!</div>
+          </div>
+        </div>
+        <div class="summary__spacer"></div>
+        <div class="controls">
+          <div class="filters">
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="failed" disabled>
+            <span class="failed">0 Failed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="passed" >
+            <span class="passed">12 Passed,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="skipped" disabled>
+            <span class="skipped">0 Skipped,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xfailed" disabled>
+            <span class="xfailed">0 Expected failures,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="xpassed" disabled>
+            <span class="xpassed">0 Unexpected passes,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="error" disabled>
+            <span class="error">0 Errors,</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="rerun" disabled>
+            <span class="rerun">0 Reruns</span>
+            <input checked="true" class="filter" name="filter_checkbox" type="checkbox" data-test-result="retried" disabled>
+            <span class="retried">0 Retried,</span>
+          </div>
+          <div class="collapse">
+            <button id="show_all_details">Show all details</button>&nbsp;/&nbsp;<button id="hide_all_details">Hide all details</button>
+          </div>
+        </div>
+      </div>
+      <div class="additional-summary summary">
+      </div>
+      <div class="additional-summary postfix">
+      </div>
+    </div>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable" data-column-type="result">Result</th>
+          <th class="sortable" data-column-type="testId">Test</th>
+          <th class="sortable" data-column-type="duration">Duration</th>
+          <th>Links</th>
+        </tr>
+      </thead>
+    </table>
+  <footer>
+    <div id="data-container" data-jsonblob="{&#34;environment&#34;: {&#34;Python&#34;: &#34;3.14.7&#34;, &#34;Platform&#34;: &#34;Windows-11-10.0.26200-SP0&#34;, &#34;Packages&#34;: {&#34;pytest&#34;: &#34;9.1.1&#34;, &#34;pluggy&#34;: &#34;1.6.0&#34;}, &#34;Plugins&#34;: {&#34;html&#34;: &#34;4.2.0&#34;, &#34;metadata&#34;: &#34;3.1.1&#34;}}, &#34;tests&#34;: {&#34;tests/test_auth.py::test_create_token&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_create_token&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_create_token&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log call -------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /auth HTTP/1.1&amp;quot; 200 27\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/auth -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/auth&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;*/*&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;48&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;username&amp;quot;: &amp;quot;admin&amp;quot;, &amp;quot;password&amp;quot;: &amp;quot;[REDACTED]&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;27&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:00 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;1b-fzC5PbvZS7L7d2HIucazaBV8lIQ\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=2sQ1PcsjpQcnMaev7j1k07Ugg0j3sxuz9LEzsiyFZ%2Fs%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708160\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=2sQ1PcsjpQcnMaev7j1k07Ugg0j3sxuz9LEzsiyFZ%2Fs%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708160\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;token&amp;quot;: &amp;quot;[REDACTED]&amp;quot;}, &amp;quot;response_time_ms&amp;quot;: 1087.45}\n\n&#34;}], &#34;tests/test_auth.py::test_invalid_credentials_return_reason&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_auth.py::test_invalid_credentials_return_reason&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_auth.py::test_invalid_credentials_return_reason&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log call -------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /auth HTTP/1.1&amp;quot; 200 28\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/auth -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/auth&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;*/*&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;60&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;username&amp;quot;: &amp;quot;invalid-user&amp;quot;, &amp;quot;password&amp;quot;: &amp;quot;[REDACTED]&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;28&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:01 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;1c-J3EiwfZwVQjKTKvpvazUfTni8fI\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=4%2B6rUP7nuU8KhjrnJGPrD%2BDiO0NM2Y2LfS9QqEOaYhA%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708161\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=4%2B6rUP7nuU8KhjrnJGPrD%2BDiO0NM2Y2LfS9QqEOaYhA%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708161\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;reason&amp;quot;: &amp;quot;Bad credentials&amp;quot;}, &amp;quot;response_time_ms&amp;quot;: 1053.14}\n\n&#34;}], &#34;tests/test_bookings.py::test_create_booking&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_bookings.py::test_create_booking&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_bookings.py::test_create_booking&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /auth HTTP/1.1&amp;quot; 200 27\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/auth -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/auth&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;*/*&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;48&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;username&amp;quot;: &amp;quot;admin&amp;quot;, &amp;quot;password&amp;quot;: &amp;quot;[REDACTED]&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;27&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:02 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;1b-O+7zTZe6bofAeisCuJZnk3Gs/DA\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=Z0hByd6Ksl4BMoec6KcXSIjSEofJfPPqbjq8CG2oX7Y%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708162\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=Z0hByd6Ksl4BMoec6KcXSIjSEofJfPPqbjq8CG2oX7Y%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708162\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;token&amp;quot;: &amp;quot;[REDACTED]&amp;quot;}, &amp;quot;response_time_ms&amp;quot;: 1074.84}\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /booking HTTP/1.1&amp;quot; 200 207\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/booking -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;192&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;207&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:03 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;cf-BSNbZMzZMOzF5H5CJEyZzJsuoqI\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=A%2F%2BbiWT4hhC8BEQ7zXmtYf4cCXKGABvTB4P8zgbVeks%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708163\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=A%2F%2BbiWT4hhC8BEQ7zXmtYf4cCXKGABvTB4P8zgbVeks%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708163\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;bookingid&amp;quot;: 2826, &amp;quot;booking&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}}, &amp;quot;response_time_ms&amp;quot;: 1070.49}\n---------------------------- Captured log teardown -----------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2826 HTTP/1.1&amp;quot; 201 7\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2826 -&amp;gt; 201\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2826&amp;quot;, &amp;quot;status_code&amp;quot;: 201, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;7&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:03 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;7-rM9AyJuqT6iOan/xHh+AW+7K/T8\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=A%2F%2BbiWT4hhC8BEQ7zXmtYf4cCXKGABvTB4P8zgbVeks%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708163\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=A%2F%2BbiWT4hhC8BEQ7zXmtYf4cCXKGABvTB4P8zgbVeks%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708163\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Created&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 266.68}&#34;}], &#34;tests/test_bookings.py::test_get_booking&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_bookings.py::test_get_booking&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_bookings.py::test_get_booking&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /booking HTTP/1.1&amp;quot; 200 207\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/booking -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;192&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;207&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:04 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;cf-uXSitKqFK+a/4V+EZZu4E40KLQE\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=SdnRN8o5%2F9gFrM2OU6fmlME0G9QQrAV8qFEJtn%2B8Zkc%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708164\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=SdnRN8o5%2F9gFrM2OU6fmlME0G9QQrAV8qFEJtn%2B8Zkc%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708164\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;bookingid&amp;quot;: 2843, &amp;quot;booking&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}}, &amp;quot;response_time_ms&amp;quot;: 1066.28}\n\n------------------------------ Captured log call -------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;GET /booking/2843 HTTP/1.1&amp;quot; 200 178\nINFO     api_client:base_client.py:90 GET https://restful-booker.herokuapp.com/booking/2843 -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;GET&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2843&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;178&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:05 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;b2-c5J+usNHQ4p2ITxDrYLZg67oSMk\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=qOQry5%2FUZ5Z8Ul1bCwWrnDSeki4KFYBmWuHn05LafQs%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708165\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=qOQry5%2FUZ5Z8Ul1bCwWrnDSeki4KFYBmWuHn05LafQs%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708165\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_time_ms&amp;quot;: 260.22}\n\n---------------------------- Captured log teardown -----------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2843 HTTP/1.1&amp;quot; 201 7\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2843 -&amp;gt; 201\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2843&amp;quot;, &amp;quot;status_code&amp;quot;: 201, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;7&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:05 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;7-rM9AyJuqT6iOan/xHh+AW+7K/T8\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=qOQry5%2FUZ5Z8Ul1bCwWrnDSeki4KFYBmWuHn05LafQs%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708165\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=qOQry5%2FUZ5Z8Ul1bCwWrnDSeki4KFYBmWuHn05LafQs%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708165\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Created&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 261.34}&#34;}], &#34;tests/test_bookings.py::test_update_booking&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_bookings.py::test_update_booking&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_bookings.py::test_update_booking&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /booking HTTP/1.1&amp;quot; 200 207\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/booking -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;192&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;207&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:06 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;cf-TyzjjTFxBHMfSV2W708GbfNqs+0\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=6VVjyIHMSRoGGrpj2VHrZHWNgH17tKJYS2hSrQiaHKA%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708166\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=6VVjyIHMSRoGGrpj2VHrZHWNgH17tKJYS2hSrQiaHKA%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708166\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;bookingid&amp;quot;: 2857, &amp;quot;booking&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}}, &amp;quot;response_time_ms&amp;quot;: 1037.71}\n\n------------------------------ Captured log call -------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;PUT /booking/2857 HTTP/1.1&amp;quot; 200 179\nINFO     api_client:base_client.py:90 PUT https://restful-booker.herokuapp.com/booking/2857 -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;PUT&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2857&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;193&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Updated&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;179&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:06 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;b3-Oj3fdzqXh5MQ5GCNdCiQf16YGBQ\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=6VVjyIHMSRoGGrpj2VHrZHWNgH17tKJYS2hSrQiaHKA%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708166\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=6VVjyIHMSRoGGrpj2VHrZHWNgH17tKJYS2hSrQiaHKA%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708166\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Updated&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_time_ms&amp;quot;: 254.43}\n\n---------------------------- Captured log teardown -----------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2857 HTTP/1.1&amp;quot; 201 7\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2857 -&amp;gt; 201\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2857&amp;quot;, &amp;quot;status_code&amp;quot;: 201, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;7&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:07 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;7-rM9AyJuqT6iOan/xHh+AW+7K/T8\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=3EYL5%2BZfp9JRi0DDpHSz0DPRv123Kipflue9UQPz52I%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708167\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=3EYL5%2BZfp9JRi0DDpHSz0DPRv123Kipflue9UQPz52I%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708167\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Created&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 541.88}&#34;}], &#34;tests/test_bookings.py::test_partial_update_booking&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_bookings.py::test_partial_update_booking&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_bookings.py::test_partial_update_booking&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /booking HTTP/1.1&amp;quot; 200 207\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/booking -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;192&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;207&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:08 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;cf-jHPleYao4cYO5FVURl5RG3aYKE8\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=48w6tnlklOKJMpF4qp3niDL8i2hwArUxcmPD69mD2y0%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708168\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=48w6tnlklOKJMpF4qp3niDL8i2hwArUxcmPD69mD2y0%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708168\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;bookingid&amp;quot;: 2877, &amp;quot;booking&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}}, &amp;quot;response_time_ms&amp;quot;: 1083.72}\n\n------------------------------ Captured log call -------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;PATCH /booking/2877 HTTP/1.1&amp;quot; 200 180\nINFO     api_client:base_client.py:90 PATCH https://restful-booker.herokuapp.com/booking/2877 -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;PATCH&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2877&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;36&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;additionalneeds&amp;quot;: &amp;quot;Late checkout&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;180&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:08 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;b4-f+HEghUZzc1HYDWz3UnXb6SLKXE\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=48w6tnlklOKJMpF4qp3niDL8i2hwArUxcmPD69mD2y0%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708168\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=48w6tnlklOKJMpF4qp3niDL8i2hwArUxcmPD69mD2y0%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708168\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Late checkout&amp;quot;}, &amp;quot;response_time_ms&amp;quot;: 268.63}\n\n---------------------------- Captured log teardown -----------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2877 HTTP/1.1&amp;quot; 201 7\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2877 -&amp;gt; 201\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2877&amp;quot;, &amp;quot;status_code&amp;quot;: 201, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;7&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:08 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;7-rM9AyJuqT6iOan/xHh+AW+7K/T8\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=48w6tnlklOKJMpF4qp3niDL8i2hwArUxcmPD69mD2y0%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708168\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=48w6tnlklOKJMpF4qp3niDL8i2hwArUxcmPD69mD2y0%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708168\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Created&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 267.75}&#34;}], &#34;tests/test_bookings.py::test_delete_booking&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_bookings.py::test_delete_booking&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_bookings.py::test_delete_booking&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /booking HTTP/1.1&amp;quot; 200 207\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/booking -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;192&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;207&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:10 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;cf-o1Wxsmq0sJNO2ybD5c9v/L8TI6c\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=nCEf5cZ2SVH0asKAXvFzHxhOdOUw1sCUTZJaVt6%2B4CQ%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708170\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=nCEf5cZ2SVH0asKAXvFzHxhOdOUw1sCUTZJaVt6%2B4CQ%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708170\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;bookingid&amp;quot;: 2891, &amp;quot;booking&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}}, &amp;quot;response_time_ms&amp;quot;: 1048.04}\n\n------------------------------ Captured log call -------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2891 HTTP/1.1&amp;quot; 201 7\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2891 -&amp;gt; 201\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2891&amp;quot;, &amp;quot;status_code&amp;quot;: 201, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;7&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:10 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;7-rM9AyJuqT6iOan/xHh+AW+7K/T8\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=nCEf5cZ2SVH0asKAXvFzHxhOdOUw1sCUTZJaVt6%2B4CQ%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708170\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=nCEf5cZ2SVH0asKAXvFzHxhOdOUw1sCUTZJaVt6%2B4CQ%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708170\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Created&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 260.76}\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;GET /booking/2891 HTTP/1.1&amp;quot; 404 9\nINFO     api_client:base_client.py:90 GET https://restful-booker.herokuapp.com/booking/2891 -&amp;gt; 404\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;GET&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2891&amp;quot;, &amp;quot;status_code&amp;quot;: 404, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;9&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:10 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;9-0gXL1ngzMqISxa6S1zx3F4wtLyg\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=nCEf5cZ2SVH0asKAXvFzHxhOdOUw1sCUTZJaVt6%2B4CQ%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708170\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=nCEf5cZ2SVH0asKAXvFzHxhOdOUw1sCUTZJaVt6%2B4CQ%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708170\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Not Found&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 256.76}\n\n---------------------------- Captured log teardown -----------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2891 HTTP/1.1&amp;quot; 405 18\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2891 -&amp;gt; 405\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2891&amp;quot;, &amp;quot;status_code&amp;quot;: 405, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;18&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:10 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;12-UGJMK66P4abaBlq0vKHJaCKuGCA\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=nCEf5cZ2SVH0asKAXvFzHxhOdOUw1sCUTZJaVt6%2B4CQ%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708170\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=nCEf5cZ2SVH0asKAXvFzHxhOdOUw1sCUTZJaVt6%2B4CQ%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708170\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Method Not Allowed&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 259.57}&#34;}], &#34;tests/test_bookings.py::test_update_without_valid_token[anonymous_booking_client]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_bookings.py::test_update_without_valid_token[anonymous_booking_client]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_bookings.py::test_update_without_valid_token[anonymous_booking_client]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /booking HTTP/1.1&amp;quot; 200 207\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/booking -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;192&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;207&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:11 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;cf-c0TYcx47y/5GWCcI+oMonZulJ4s\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=DukqG99ADpL9NxyX2zFnB0452h2qjgjyLaH%2FJmCMUC4%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708171\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=DukqG99ADpL9NxyX2zFnB0452h2qjgjyLaH%2FJmCMUC4%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708171\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;bookingid&amp;quot;: 2904, &amp;quot;booking&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}}, &amp;quot;response_time_ms&amp;quot;: 1034.94}\n\n------------------------------ Captured log call -------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;PUT /booking/2904 HTTP/1.1&amp;quot; 403 9\nINFO     api_client:base_client.py:90 PUT https://restful-booker.herokuapp.com/booking/2904 -&amp;gt; 403\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;PUT&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2904&amp;quot;, &amp;quot;status_code&amp;quot;: 403, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;192&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;9&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:12 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;9-PatfYBLj4Um1qTm5zrukoLhNyPU\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=paFUWi5%2BTnqwK8%2FTLxjJot7hyetCfSVNamRrCHl6WFg%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708172\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=paFUWi5%2BTnqwK8%2FTLxjJot7hyetCfSVNamRrCHl6WFg%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708172\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Forbidden&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 1060.9}\n\n---------------------------- Captured log teardown -----------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2904 HTTP/1.1&amp;quot; 201 7\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2904 -&amp;gt; 201\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2904&amp;quot;, &amp;quot;status_code&amp;quot;: 201, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;7&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:13 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;7-rM9AyJuqT6iOan/xHh+AW+7K/T8\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=rJaVd5zuj20QPNWIFW3tNwUtaoPbf7eXNlU19P68GQU%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708173\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=rJaVd5zuj20QPNWIFW3tNwUtaoPbf7eXNlU19P68GQU%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708173\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Created&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 256.9}&#34;}], &#34;tests/test_bookings.py::test_update_without_valid_token[invalid_token_booking_client]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_bookings.py::test_update_without_valid_token[invalid_token_booking_client]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_bookings.py::test_update_without_valid_token[invalid_token_booking_client]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /booking HTTP/1.1&amp;quot; 200 207\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/booking -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;192&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;207&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:14 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;cf-TSBKagGv2XUecS8ddZ/QJNg3eu8\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=QKV62LDd%2BgulR1iMoGIy7dkUq87kmfkgpYTfQcEAJxE%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708174\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=QKV62LDd%2BgulR1iMoGIy7dkUq87kmfkgpYTfQcEAJxE%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708174\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;bookingid&amp;quot;: 2929, &amp;quot;booking&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}}, &amp;quot;response_time_ms&amp;quot;: 1086.86}\n\n------------------------------ Captured log call -------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;PUT /booking/2929 HTTP/1.1&amp;quot; 403 9\nINFO     api_client:base_client.py:90 PUT https://restful-booker.herokuapp.com/booking/2929 -&amp;gt; 403\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;PUT&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2929&amp;quot;, &amp;quot;status_code&amp;quot;: 403, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;192&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;9&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:15 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;9-PatfYBLj4Um1qTm5zrukoLhNyPU\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=4Emp8ABiAZpYVHa3%2BSgihlmwCMA5jdsgGpyfYow4hD8%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708175\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=4Emp8ABiAZpYVHa3%2BSgihlmwCMA5jdsgGpyfYow4hD8%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708175\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Forbidden&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 1059.85}\n\n---------------------------- Captured log teardown -----------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2929 HTTP/1.1&amp;quot; 201 7\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2929 -&amp;gt; 201\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2929&amp;quot;, &amp;quot;status_code&amp;quot;: 201, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;7&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:15 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;7-rM9AyJuqT6iOan/xHh+AW+7K/T8\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=4Emp8ABiAZpYVHa3%2BSgihlmwCMA5jdsgGpyfYow4hD8%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708175\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=4Emp8ABiAZpYVHa3%2BSgihlmwCMA5jdsgGpyfYow4hD8%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708175\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Created&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 263.87}&#34;}], &#34;tests/test_bookings.py::test_delete_without_valid_token[anonymous_booking_client]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_bookings.py::test_delete_without_valid_token[anonymous_booking_client]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_bookings.py::test_delete_without_valid_token[anonymous_booking_client]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /booking HTTP/1.1&amp;quot; 200 207\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/booking -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;192&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;207&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:16 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;cf-CXx3Q8wFYx/vDl/Ydsv4LKDZAgA\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=PBjXn4yNo%2FyJphFeYW7QJkhHWR7XhWlHPaU3svPDmk0%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708176\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=PBjXn4yNo%2FyJphFeYW7QJkhHWR7XhWlHPaU3svPDmk0%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708176\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;bookingid&amp;quot;: 2955, &amp;quot;booking&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}}, &amp;quot;response_time_ms&amp;quot;: 1099.58}\n\n------------------------------ Captured log call -------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2955 HTTP/1.1&amp;quot; 403 9\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2955 -&amp;gt; 403\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2955&amp;quot;, &amp;quot;status_code&amp;quot;: 403, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;9&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:17 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;9-PatfYBLj4Um1qTm5zrukoLhNyPU\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=4Pt9iIVeic4seijmWYv14SjeL%2FfEwyQkKdC0kawOAh8%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708177\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=4Pt9iIVeic4seijmWYv14SjeL%2FfEwyQkKdC0kawOAh8%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708177\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Forbidden&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 1094.72}\n\n---------------------------- Captured log teardown -----------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2955 HTTP/1.1&amp;quot; 201 7\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2955 -&amp;gt; 201\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2955&amp;quot;, &amp;quot;status_code&amp;quot;: 201, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;7&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:18 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;7-rM9AyJuqT6iOan/xHh+AW+7K/T8\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=9E1od6F39yBNwh4EI4BFpRqfyEmnD2%2FkmGukUSlEQd4%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708178\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=9E1od6F39yBNwh4EI4BFpRqfyEmnD2%2FkmGukUSlEQd4%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708178\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Created&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 271.95}&#34;}], &#34;tests/test_bookings.py::test_delete_without_valid_token[invalid_token_booking_client]&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_bookings.py::test_delete_without_valid_token[invalid_token_booking_client]&#34;, &#34;duration&#34;: &#34;00:00:02&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_bookings.py::test_delete_without_valid_token[invalid_token_booking_client]&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:02&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log setup ------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;POST /booking HTTP/1.1&amp;quot; 200 207\nINFO     api_client:base_client.py:90 POST https://restful-booker.herokuapp.com/booking -&amp;gt; 200\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;POST&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking&amp;quot;, &amp;quot;status_code&amp;quot;: 200, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;192&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json&amp;quot;}, &amp;quot;request_body&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;207&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;application/json; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:19 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;cf-/FEG9kih/cTp+jP0YO7XwrnOw34\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=SuEnbirsvUUOshVdqRSYwL9lugOTQEChM6yZax%2FmiaE%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708179\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=SuEnbirsvUUOshVdqRSYwL9lugOTQEChM6yZax%2FmiaE%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708179\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: {&amp;quot;bookingid&amp;quot;: 2979, &amp;quot;booking&amp;quot;: {&amp;quot;firstname&amp;quot;: &amp;quot;Taylor&amp;quot;, &amp;quot;lastname&amp;quot;: &amp;quot;Automation&amp;quot;, &amp;quot;totalprice&amp;quot;: 120, &amp;quot;depositpaid&amp;quot;: true, &amp;quot;bookingdates&amp;quot;: {&amp;quot;checkin&amp;quot;: &amp;quot;2026-10-01&amp;quot;, &amp;quot;checkout&amp;quot;: &amp;quot;2026-10-05&amp;quot;}, &amp;quot;additionalneeds&amp;quot;: &amp;quot;Window seat&amp;quot;}}, &amp;quot;response_time_ms&amp;quot;: 1022.43}\n\n------------------------------ Captured log call -------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2979 HTTP/1.1&amp;quot; 403 9\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2979 -&amp;gt; 403\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2979&amp;quot;, &amp;quot;status_code&amp;quot;: 403, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;9&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:20 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;9-PatfYBLj4Um1qTm5zrukoLhNyPU\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=QQyKFWBxsiSIspIDDH%2B2dD%2FHFtd%2BBbSn795s1zwewlE%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708180\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=QQyKFWBxsiSIspIDDH%2B2dD%2FHFtd%2BBbSn795s1zwewlE%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708180\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Forbidden&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 1029.6}\n\n---------------------------- Captured log teardown -----------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;DELETE /booking/2979 HTTP/1.1&amp;quot; 201 7\nINFO     api_client:base_client.py:90 DELETE https://restful-booker.herokuapp.com/booking/2979 -&amp;gt; 201\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;DELETE&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/2979&amp;quot;, &amp;quot;status_code&amp;quot;: 201, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;, &amp;quot;Cookie&amp;quot;: &amp;quot;[REDACTED]&amp;quot;, &amp;quot;Content-Length&amp;quot;: &amp;quot;0&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;7&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:20 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;7-rM9AyJuqT6iOan/xHh+AW+7K/T8\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=QQyKFWBxsiSIspIDDH%2B2dD%2FHFtd%2BBbSn795s1zwewlE%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708180\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=QQyKFWBxsiSIspIDDH%2B2dD%2FHFtd%2BBbSn795s1zwewlE%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708180\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Created&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 253.25}&#34;}], &#34;tests/test_bookings.py::test_get_nonexistent_booking&#34;: [{&#34;extras&#34;: [], &#34;result&#34;: &#34;Passed&#34;, &#34;testId&#34;: &#34;tests/test_bookings.py::test_get_nonexistent_booking&#34;, &#34;duration&#34;: &#34;00:00:01&#34;, &#34;resultsTableRow&#34;: [&#34;&lt;td class=\&#34;col-result\&#34;&gt;Passed&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-testId\&#34;&gt;tests/test_bookings.py::test_get_nonexistent_booking&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-duration\&#34;&gt;00:00:01&lt;/td&gt;&#34;, &#34;&lt;td class=\&#34;col-links\&#34;&gt;&lt;/td&gt;&#34;], &#34;log&#34;: &#34;------------------------------ Captured log call -------------------------------\nDEBUG    urllib3.connectionpool:connectionpool.py:1081 Starting new HTTPS connection (1): restful-booker.herokuapp.com:443\nDEBUG    urllib3.connectionpool:connectionpool.py:550 https://restful-booker.herokuapp.com:443 &amp;quot;GET /booking/0 HTTP/1.1&amp;quot; 404 9\nINFO     api_client:base_client.py:90 GET https://restful-booker.herokuapp.com/booking/0 -&amp;gt; 404\nDEBUG    api_client:base_client.py:91 API exchange: {&amp;quot;method&amp;quot;: &amp;quot;GET&amp;quot;, &amp;quot;url&amp;quot;: &amp;quot;https://restful-booker.herokuapp.com/booking/0&amp;quot;, &amp;quot;status_code&amp;quot;: 404, &amp;quot;request_headers&amp;quot;: {&amp;quot;User-Agent&amp;quot;: &amp;quot;python-requests/2.34.2&amp;quot;, &amp;quot;Accept-Encoding&amp;quot;: &amp;quot;gzip, deflate, zstd&amp;quot;, &amp;quot;Accept&amp;quot;: &amp;quot;application/json&amp;quot;, &amp;quot;Connection&amp;quot;: &amp;quot;keep-alive&amp;quot;}, &amp;quot;request_body&amp;quot;: null, &amp;quot;response_headers&amp;quot;: {&amp;quot;Content-Length&amp;quot;: &amp;quot;9&amp;quot;, &amp;quot;Content-Type&amp;quot;: &amp;quot;text/plain; charset=utf-8&amp;quot;, &amp;quot;Date&amp;quot;: &amp;quot;Tue, 29 Sep 2026 18:56:21 GMT&amp;quot;, &amp;quot;Etag&amp;quot;: &amp;quot;W/\\&amp;quot;9-0gXL1ngzMqISxa6S1zx3F4wtLyg\\&amp;quot;&amp;quot;, &amp;quot;Nel&amp;quot;: &amp;quot;{\\&amp;quot;report_to\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;response_headers\\&amp;quot;:[\\&amp;quot;Via\\&amp;quot;],\\&amp;quot;max_age\\&amp;quot;:3600,\\&amp;quot;success_fraction\\&amp;quot;:0.01,\\&amp;quot;failure_fraction\\&amp;quot;:0.1}&amp;quot;, &amp;quot;Report-To&amp;quot;: &amp;quot;{\\&amp;quot;group\\&amp;quot;:\\&amp;quot;heroku-nel\\&amp;quot;,\\&amp;quot;endpoints\\&amp;quot;:[{\\&amp;quot;url\\&amp;quot;:\\&amp;quot;https://nel.heroku.com/reports?s=3WDSAvlZxwzLPb0izIPukS%2FosBJ6lxzbWcsmRWsFUAA%3D\\\\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\\\\u0026ts=1790708181\\&amp;quot;}],\\&amp;quot;max_age\\&amp;quot;:3600}&amp;quot;, &amp;quot;Reporting-Endpoints&amp;quot;: &amp;quot;heroku-nel=\\&amp;quot;https://nel.heroku.com/reports?s=3WDSAvlZxwzLPb0izIPukS%2FosBJ6lxzbWcsmRWsFUAA%3D&amp;amp;sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&amp;amp;ts=1790708181\\&amp;quot;&amp;quot;, &amp;quot;Server&amp;quot;: &amp;quot;Heroku&amp;quot;, &amp;quot;Via&amp;quot;: &amp;quot;1.1 heroku-router&amp;quot;, &amp;quot;X-Powered-By&amp;quot;: &amp;quot;Express&amp;quot;}, &amp;quot;response_body&amp;quot;: &amp;quot;Not Found&amp;quot;, &amp;quot;response_time_ms&amp;quot;: 1085.01}\n\n&#34;}]}, &#34;renderCollapsed&#34;: [&#34;passed&#34;], &#34;initialSort&#34;: &#34;result&#34;, &#34;title&#34;: &#34;report.html&#34;}"></div>
+    <script>
+      (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const { getCollapsedCategory, setCollapsedIds } = require('./storage.js')
+
+class DataManager {
+    setManager(data) {
+        const collapsedCategories = [...getCollapsedCategory(data.renderCollapsed)]
+        const collapsedIds = []
+        const tests = Object.values(data.tests).flat().map((test, index) => {
+            const collapsed = collapsedCategories.includes(test.result.toLowerCase())
+            const id = `test_${index}`
+            if (collapsed) {
+                collapsedIds.push(id)
+            }
+            return {
+                ...test,
+                id,
+                collapsed,
+            }
+        })
+        const dataBlob = { ...data, tests }
+        this.data = { ...dataBlob }
+        this.renderData = { ...dataBlob }
+        setCollapsedIds(collapsedIds)
+    }
+
+    get allData() {
+        return { ...this.data }
+    }
+
+    resetRender() {
+        this.renderData = { ...this.data }
+    }
+
+    setRender(data) {
+        this.renderData.tests = [...data]
+    }
+
+    toggleCollapsedItem(id) {
+        this.renderData.tests = this.renderData.tests.map((test) =>
+            test.id === id ? { ...test, collapsed: !test.collapsed } : test,
+        )
+    }
+
+    set allCollapsed(collapsed) {
+        this.renderData = { ...this.renderData, tests: [...this.renderData.tests.map((test) => (
+            { ...test, collapsed }
+        ))] }
+    }
+
+    get testSubset() {
+        return [...this.renderData.tests]
+    }
+
+    get environment() {
+        return this.renderData.environment
+    }
+
+    get initialSort() {
+        return this.data.initialSort
+    }
+}
+
+module.exports = {
+    manager: new DataManager(),
+}
+
+},{"./storage.js":8}],2:[function(require,module,exports){
+const mediaViewer = require('./mediaviewer.js')
+const templateEnvRow = document.getElementById('template_environment_row')
+const templateResult = document.getElementById('template_results-table__tbody')
+
+function htmlToElements(html) {
+    const temp = document.createElement('template')
+    temp.innerHTML = html
+    return temp.content.childNodes
+}
+
+const find = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return elem.querySelector(selector)
+}
+
+const findAll = (selector, elem) => {
+    if (!elem) {
+        elem = document
+    }
+    return [...elem.querySelectorAll(selector)]
+}
+
+const dom = {
+    getStaticRow: (key, value) => {
+        const envRow = templateEnvRow.content.cloneNode(true)
+        const isObj = typeof value === 'object' && value !== null
+        const values = isObj ? Object.keys(value).map((k) => `${k}: ${value[k]}`) : null
+
+        const valuesElement = htmlToElements(
+            values ? `<ul>${values.map((val) => `<li>${val}</li>`).join('')}<ul>` : `<div>${value}</div>`)[0]
+        const td = findAll('td', envRow)
+        td[0].textContent = key
+        td[1].appendChild(valuesElement)
+
+        return envRow
+    },
+    getResultTBody: ({ testId, id, log, extras, resultsTableRow, tableHtml, result, collapsed }) => {
+        const resultBody = templateResult.content.cloneNode(true)
+        resultBody.querySelector('tbody').classList.add(result.toLowerCase())
+        resultBody.querySelector('tbody').id = testId
+        resultBody.querySelector('.collapsible').dataset.id = id
+
+        resultsTableRow.forEach((html) => {
+            const t = document.createElement('template')
+            t.innerHTML = html
+            resultBody.querySelector('.collapsible').appendChild(t.content)
+        })
+
+        if (log) {
+            // Wrap lines starting with "E" with span.error to color those lines red
+            const wrappedLog = log.replace(/^E.*$/gm, (match) => `<span class="error">${match}</span>`)
+            resultBody.querySelector('.log').innerHTML = wrappedLog
+        } else {
+            resultBody.querySelector('.log').remove()
+        }
+
+        if (collapsed) {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.add('collapsed')
+            resultBody.querySelector('.extras-row').classList.add('hidden')
+        } else {
+            resultBody.querySelector('.collapsible > .col-result')?.classList.remove('collapsed')
+        }
+
+        const media = []
+        extras?.forEach(({ name, format_type, content }) => {
+            if (['image', 'video'].includes(format_type)) {
+                media.push({ path: content, name, format_type })
+            }
+
+            if (format_type === 'html') {
+                resultBody.querySelector('.extraHTML').insertAdjacentHTML('beforeend', `<div>${content}</div>`)
+            }
+        })
+        mediaViewer.setup(resultBody, media)
+
+        // Add custom html from the pytest_html_results_table_html hook
+        tableHtml?.forEach((item) => {
+            resultBody.querySelector('td[class="extra"]').insertAdjacentHTML('beforeend', item)
+        })
+
+        return resultBody
+    },
+}
+
+module.exports = {
+    dom,
+    htmlToElements,
+    find,
+    findAll,
+}
+
+},{"./mediaviewer.js":6}],3:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const storageModule = require('./storage.js')
+
+const getFilteredSubSet = (filter) =>
+    manager.allData.tests.filter(({ result }) => filter.includes(result.toLowerCase()))
+
+const doInitFilter = () => {
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+}
+
+const doFilter = (type, show) => {
+    if (show) {
+        storageModule.showCategory(type)
+    } else {
+        storageModule.hideCategory(type)
+    }
+
+    const currentFilter = storageModule.getVisible()
+    const filteredSubset = getFilteredSubSet(currentFilter)
+    manager.setRender(filteredSubset)
+
+    const sortColumn = storageModule.getSort()
+    doSort(sortColumn, true)
+}
+
+module.exports = {
+    doFilter,
+    doInitFilter,
+}
+
+},{"./datamanager.js":1,"./sort.js":7,"./storage.js":8}],4:[function(require,module,exports){
+const { redraw, bindEvents, renderStatic } = require('./main.js')
+const { doInitFilter } = require('./filter.js')
+const { doInitSort } = require('./sort.js')
+const { manager } = require('./datamanager.js')
+const data = JSON.parse(document.getElementById('data-container').dataset.jsonblob)
+
+function init() {
+    manager.setManager(data)
+    doInitFilter()
+    doInitSort()
+    renderStatic()
+    redraw()
+    bindEvents()
+}
+
+init()
+
+},{"./datamanager.js":1,"./filter.js":3,"./main.js":5,"./sort.js":7}],5:[function(require,module,exports){
+const { dom, find, findAll } = require('./dom.js')
+const { manager } = require('./datamanager.js')
+const { doSort } = require('./sort.js')
+const { doFilter } = require('./filter.js')
+const {
+    getVisible,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    getSortDirection,
+    possibleFilters,
+} = require('./storage.js')
+
+const removeChildren = (node) => {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild)
+    }
+}
+
+const renderStatic = () => {
+    const renderEnvironmentTable = () => {
+        const environment = manager.environment
+        const rows = Object.keys(environment).map((key) => dom.getStaticRow(key, environment[key]))
+        const table = document.getElementById('environment')
+        removeChildren(table)
+        rows.forEach((row) => table.appendChild(row))
+    }
+    renderEnvironmentTable()
+}
+
+const addItemToggleListener = (elem) => {
+    elem.addEventListener('click', ({ target }) => {
+        const id = target.parentElement.dataset.id
+        manager.toggleCollapsedItem(id)
+
+        const collapsedIds = getCollapsedIds()
+        if (collapsedIds.includes(id)) {
+            const updated = collapsedIds.filter((item) => item !== id)
+            setCollapsedIds(updated)
+        } else {
+            collapsedIds.push(id)
+            setCollapsedIds(collapsedIds)
+        }
+        redraw()
+    })
+}
+
+const renderContent = (tests) => {
+    const sortAttr = getSort(manager.initialSort)
+    const sortAsc = JSON.parse(getSortDirection())
+    const rows = tests.map(dom.getResultTBody)
+    const table = document.getElementById('results-table')
+    const tableHeader = document.getElementById('results-table-head')
+
+    const newTable = document.createElement('table')
+    newTable.id = 'results-table'
+
+    // remove all sorting classes and set the relevant
+    findAll('.sortable', tableHeader).forEach((elem) => elem.classList.remove('asc', 'desc'))
+    tableHeader.querySelector(`.sortable[data-column-type="${sortAttr}"]`)?.classList.add(sortAsc ? 'desc' : 'asc')
+    newTable.appendChild(tableHeader)
+
+    if (!rows.length) {
+        const emptyTable = document.getElementById('template_results-table__body--empty').content.cloneNode(true)
+        newTable.appendChild(emptyTable)
+    } else {
+        rows.forEach((row) => {
+            if (!!row) {
+                findAll('.collapsible td:not(.col-links', row).forEach(addItemToggleListener)
+                find('.logexpander', row).addEventListener('click',
+                    (evt) => evt.target.parentNode.classList.toggle('expanded'),
+                )
+                newTable.appendChild(row)
+            }
+        })
+    }
+
+    table.replaceWith(newTable)
+}
+
+const renderDerived = () => {
+    const currentFilter = getVisible()
+    possibleFilters.forEach((result) => {
+        const input = document.querySelector(`input[data-test-result="${result}"]`)
+        input.checked = currentFilter.includes(result)
+    })
+}
+
+const bindEvents = () => {
+    const filterColumn = (evt) => {
+        const { target: element } = evt
+        const { testResult } = element.dataset
+
+        doFilter(testResult, element.checked)
+        const collapsedIds = getCollapsedIds()
+        const updated = manager.renderData.tests.map((test) => {
+            return {
+                ...test,
+                collapsed: collapsedIds.includes(test.id),
+            }
+        })
+        manager.setRender(updated)
+        redraw()
+    }
+
+    const header = document.getElementById('environment-header')
+    header.addEventListener('click', () => {
+        const table = document.getElementById('environment')
+        table.classList.toggle('hidden')
+        header.classList.toggle('collapsed')
+    })
+
+    findAll('input[name="filter_checkbox"]').forEach((elem) => {
+        elem.addEventListener('click', filterColumn)
+    })
+
+    findAll('.sortable').forEach((elem) => {
+        elem.addEventListener('click', (evt) => {
+            const { target: element } = evt
+            const { columnType } = element.dataset
+            doSort(columnType)
+            redraw()
+        })
+    })
+
+    document.getElementById('show_all_details').addEventListener('click', () => {
+        manager.allCollapsed = false
+        setCollapsedIds([])
+        redraw()
+    })
+    document.getElementById('hide_all_details').addEventListener('click', () => {
+        manager.allCollapsed = true
+        const allIds = manager.renderData.tests.map((test) => test.id)
+        setCollapsedIds(allIds)
+        redraw()
+    })
+}
+
+const redraw = () => {
+    const { testSubset } = manager
+
+    renderContent(testSubset)
+    renderDerived()
+}
+
+module.exports = {
+    redraw,
+    bindEvents,
+    renderStatic,
+}
+
+},{"./datamanager.js":1,"./dom.js":2,"./filter.js":3,"./sort.js":7,"./storage.js":8}],6:[function(require,module,exports){
+class MediaViewer {
+    constructor(assets) {
+        this.assets = assets
+        this.index = 0
+    }
+
+    nextActive() {
+        this.index = this.index === this.assets.length - 1 ? 0 : this.index + 1
+        return [this.activeFile, this.index]
+    }
+
+    prevActive() {
+        this.index = this.index === 0 ? this.assets.length - 1 : this.index -1
+        return [this.activeFile, this.index]
+    }
+
+    get currentIndex() {
+        return this.index
+    }
+
+    get activeFile() {
+        return this.assets[this.index]
+    }
+}
+
+
+const setup = (resultBody, assets) => {
+    if (!assets.length) {
+        resultBody.querySelector('.media').classList.add('hidden')
+        return
+    }
+
+    const mediaViewer = new MediaViewer(assets)
+    const container = resultBody.querySelector('.media-container')
+    const leftArrow = resultBody.querySelector('.media-container__nav--left')
+    const rightArrow = resultBody.querySelector('.media-container__nav--right')
+    const mediaName = resultBody.querySelector('.media__name')
+    const counter = resultBody.querySelector('.media__counter')
+    const imageEl = resultBody.querySelector('img')
+    const sourceEl = resultBody.querySelector('source')
+    const videoEl = resultBody.querySelector('video')
+
+    const setImg = (media, index) => {
+        if (media?.format_type === 'image') {
+            imageEl.src = media.path
+
+            imageEl.classList.remove('hidden')
+            videoEl.classList.add('hidden')
+        } else if (media?.format_type === 'video') {
+            sourceEl.src = media.path
+
+            videoEl.classList.remove('hidden')
+            imageEl.classList.add('hidden')
+        }
+
+        mediaName.innerText = media?.name
+        counter.innerText = `${index + 1} / ${assets.length}`
+    }
+    setImg(mediaViewer.activeFile, mediaViewer.currentIndex)
+
+    const moveLeft = () => {
+        const [media, index] = mediaViewer.prevActive()
+        setImg(media, index)
+    }
+    const doRight = () => {
+        const [media, index] = mediaViewer.nextActive()
+        setImg(media, index)
+    }
+    const openImg = () => {
+        window.open(mediaViewer.activeFile.path, '_blank')
+    }
+    if (assets.length === 1) {
+        container.classList.add('media-container--fullscreen')
+    } else {
+        leftArrow.addEventListener('click', moveLeft)
+        rightArrow.addEventListener('click', doRight)
+    }
+    imageEl.addEventListener('click', openImg)
+}
+
+module.exports = {
+    setup,
+}
+
+},{}],7:[function(require,module,exports){
+const { manager } = require('./datamanager.js')
+const storageModule = require('./storage.js')
+
+const genericSort = (list, key, ascending, customOrder) => {
+    let sorted
+    if (customOrder) {
+        sorted = list.sort((a, b) => {
+            const aValue = a.result.toLowerCase()
+            const bValue = b.result.toLowerCase()
+
+            const aIndex = customOrder.findIndex((item) => item.toLowerCase() === aValue)
+            const bIndex = customOrder.findIndex((item) => item.toLowerCase() === bValue)
+
+            // Compare the indices to determine the sort order
+            return aIndex - bIndex
+        })
+    } else {
+        sorted = list.sort((a, b) => a[key] === b[key] ? 0 : a[key] > b[key] ? 1 : -1)
+    }
+
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const durationSort = (list, ascending) => {
+    const parseDuration = (duration) => {
+        if (duration.includes(':')) {
+            // If it's in the format "HH:mm:ss"
+            const [hours, minutes, seconds] = duration.split(':').map(Number)
+            return (hours * 3600 + minutes * 60 + seconds) * 1000
+        } else {
+            // If it's in the format "nnn ms"
+            return parseInt(duration)
+        }
+    }
+    const sorted = list.sort((a, b) => parseDuration(a['duration']) - parseDuration(b['duration']))
+    if (ascending) {
+        sorted.reverse()
+    }
+    return sorted
+}
+
+const doInitSort = () => {
+    const type = storageModule.getSort(manager.initialSort)
+    const ascending = storageModule.getSortDirection()
+    const list = manager.testSubset
+    const initialOrder = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed', 'Skipped', 'Passed']
+
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    if (type?.toLowerCase() === 'original') {
+        manager.setRender(list)
+    } else {
+        let sortedList
+        switch (type) {
+        case 'duration':
+            sortedList = durationSort(list, ascending)
+            break
+        case 'result':
+            sortedList = genericSort(list, type, ascending, initialOrder)
+            break
+        default:
+            sortedList = genericSort(list, type, ascending)
+            break
+        }
+        manager.setRender(sortedList)
+    }
+}
+
+const doSort = (type, skipDirection) => {
+    const newSortType = storageModule.getSort(manager.initialSort) !== type
+    const currentAsc = storageModule.getSortDirection()
+    let ascending
+    if (skipDirection) {
+        ascending = currentAsc
+    } else {
+        ascending = newSortType ? false : !currentAsc
+    }
+    storageModule.setSort(type)
+    storageModule.setSortDirection(ascending)
+
+    const list = manager.testSubset
+    const sortedList = type === 'duration' ? durationSort(list, ascending) : genericSort(list, type, ascending)
+    manager.setRender(sortedList)
+}
+
+module.exports = {
+    doInitSort,
+    doSort,
+}
+
+},{"./datamanager.js":1,"./storage.js":8}],8:[function(require,module,exports){
+const possibleFilters = [
+    'passed',
+    'skipped',
+    'failed',
+    'error',
+    'xfailed',
+    'xpassed',
+    'rerun',
+]
+
+const getVisible = () => {
+    const url = new URL(window.location.href)
+    const settings = new URLSearchParams(url.search).get('visible')
+    const lower = (item) => {
+        const lowerItem = item.toLowerCase()
+        if (possibleFilters.includes(lowerItem)) {
+            return lowerItem
+        }
+        return null
+    }
+    return settings === null ?
+        possibleFilters :
+        [...new Set(settings?.split(',').map(lower).filter((item) => item))]
+}
+
+const hideCategory = (categoryToHide) => {
+    const url = new URL(window.location.href)
+    const visibleParams = new URLSearchParams(url.search).get('visible')
+    const currentVisible = visibleParams ? visibleParams.split(',') : [...possibleFilters]
+    const settings = [...new Set(currentVisible)].filter((f) => f !== categoryToHide).join(',')
+
+    url.searchParams.set('visible', settings)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const showCategory = (categoryToShow) => {
+    if (typeof window === 'undefined') {
+        return
+    }
+    const url = new URL(window.location.href)
+    const currentVisible = new URLSearchParams(url.search).get('visible')?.split(',').filter(Boolean) ||
+        [...possibleFilters]
+    const settings = [...new Set([categoryToShow, ...currentVisible])]
+    const noFilter = possibleFilters.length === settings.length || !settings.length
+
+    noFilter ? url.searchParams.delete('visible') : url.searchParams.set('visible', settings.join(','))
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getSort = (initialSort) => {
+    const url = new URL(window.location.href)
+    let sort = new URLSearchParams(url.search).get('sort')
+    if (!sort) {
+        sort = initialSort || 'result'
+    }
+    return sort
+}
+
+const setSort = (type) => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('sort', type)
+    window.history.pushState({}, null, unescape(url.href))
+}
+
+const getCollapsedCategory = (renderCollapsed) => {
+    let categories
+    if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+        const collapsedItems = new URLSearchParams(url.search).get('collapsed')
+        switch (true) {
+        case !renderCollapsed && collapsedItems === null:
+            categories = ['passed']
+            break
+        case collapsedItems?.length === 0 || /^["']{2}$/.test(collapsedItems):
+            categories = []
+            break
+        case /^all$/.test(collapsedItems) || collapsedItems === null && /^all$/.test(renderCollapsed):
+            categories = [...possibleFilters]
+            break
+        default:
+            categories = collapsedItems?.split(',').map((item) => item.toLowerCase()) || renderCollapsed
+            break
+        }
+    } else {
+        categories = []
+    }
+    return categories
+}
+
+const getSortDirection = () => JSON.parse(sessionStorage.getItem('sortAsc')) || false
+const setSortDirection = (ascending) => sessionStorage.setItem('sortAsc', ascending)
+
+const getCollapsedIds = () => JSON.parse(sessionStorage.getItem('collapsedIds')) || []
+const setCollapsedIds = (list) => sessionStorage.setItem('collapsedIds', JSON.stringify(list))
+
+module.exports = {
+    getVisible,
+    hideCategory,
+    showCategory,
+    getCollapsedIds,
+    setCollapsedIds,
+    getSort,
+    setSort,
+    getSortDirection,
+    setSortDirection,
+    getCollapsedCategory,
+    possibleFilters,
+}
+
+},{}]},{},[4]);
+    </script>
+  </footer>
+  </body>
+</html>
