@@ -32,9 +32,9 @@ python -m pip install -r requirements.txt
 Copy-Item .env.example .env
 ```
 
-Set `API_BASE_URL`, `API_USERNAME`, and `API_PASSWORD` in `.env` for local runs.
-The example file uses the demo credentials documented by Restful-Booker;
-`.env` is excluded from Git. The base URL defaults to
+Set `API_USERNAME` and `API_PASSWORD` in `.env`. The example file leaves those
+values blank. Restful-Booker documents the demo account `admin` / `password123`.
+`.env` is excluded from Git. `API_BASE_URL` is optional and defaults to
 `https://restful-booker.herokuapp.com`.
 
 ## Run Tests
@@ -54,8 +54,10 @@ python -m pytest -m regression
 
 The suite checks token creation and invalid credentials; booking creation,
 retrieval, full update, partial update, and deletion; missing and invalid tokens
-for protected operations; and retrieval of a nonexistent booking. The create
-and get responses are schema-validated.
+for protected operations; and retrieval of a nonexistent booking. Token
+responses are validated with `schemas/auth.json`, create responses with
+`schemas/create_booking.json`, and get, update, and partial-update responses
+with `schemas/booking.json`.
 
 ## CI
 
