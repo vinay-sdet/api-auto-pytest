@@ -3,7 +3,7 @@
 A pytest framework for live API checks against the [Restful-Booker API](https://restful-booker.herokuapp.com).
 It uses Python, `requests`, `jsonschema`, and Python's built-in logging. The API
 documentation is the source of truth for endpoint behavior:
-[Restful-Booker API docs](https://restful-booker.herokuapp.com/apidoc/index.html).
+[Restful-Booker API docs](https://restful-booker.herokuapp.com/apidoc/index.html)
 
 ## Project Layout
 
