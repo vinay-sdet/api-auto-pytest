@@ -63,7 +63,7 @@ python -m pytest -m regression
 
 `smoke` covers token creation, booking creation, retrieval, and deletion.
 `regression` covers invalid credentials, full and partial updates, update and
-delete with a missing or invalid token, and retrieval of a nonexistent booking.
+delete with a missing or invalid token, and retrieval of a nonexistent booking
 
 Checked results:
 
